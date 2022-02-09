@@ -1,0 +1,75 @@
+// 2 led 7 thanh (anot chung)
+/*
+	A0...6 = a,b,c	,d,e,f,g
+	B0 = L7S1 hang chuc
+	B1 = L7S2 hang don vi
+	
+	- led 7 thanh 1 so thi chi can 1 chan cap nguon la xong,led 7 thanh 2 so thi neu su dung chung 1 chan cap nguon thi se hien thi 
+	2 so giong nhau nen can phai tach ra lam 2 chan dieu khien khac nhau de dieu khien viec cap nguon moi sang nhu y muon 
+	
+	- 2 so cua led k sang cung 1 luc ma se thuc hien luan phien
+	-muon sang so 12 thi cho so 1 o hang chuc sang truoc,con lai hang don vi se tat,du thoi gian khi da nhin thay so 1 thi lai tat so 1 
+	o hang chuc di cho sang so 2 o hang don vi
+	
+	=> trong cung 1 thoi diem nhung 2 led se 0 cung sang dong thoi,noi cach khac chi 1 led sang tai 1 thoi diem
+	
+	- do hien tuong luu anh trong vong~ mac. cua? mat' nguoi` ,nen khi thoi diem so 1 tat roi^` so^' 2 sang',mat co the nhin thay 2 so trong
+	cung 1 khoanh khac rat ngan',gan nhu cam giac 2 so^' hien^? thi. 1 cach song song nhung thuc ra khac thoi diem^?
+	
+	=> bat^. ben nay` tat ben kia va nguoc lai trong khoanh khac cuc ngan
+*/
+
+#include "stm32f10x.h"
+#include "stm32f10x_gpio.h"
+#include "stm32f10x_rcc.h"
+
+void GPIO_configuration(void)
+{
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE); //khoi tao port A
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE); //khoi tao port B
+	
+	GPIO_InitTypeDef GPIO_InitStructure; //gan cac gia tri GPIO_IniteStructure." ",khong co dong nay thi cac dong duoi se bi loi
+	
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; //xuat tin hieu cho cac chan dieu khien
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 |GPIO_Pin_1 |GPIO_Pin_2 |GPIO_Pin_3 |GPIO_Pin_4 |GPIO_Pin_5 |GPIO_Pin_6|GPIO_Pin_7;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);//gan cac gia tri vao che do lam viec o port A
+	
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1;
+	GPIO_Init(GPIOB, &GPIO_InitStructure); //gan cac gia tri vao che do lam viec o port B
+}
+
+void Delay(unsigned int time){
+	
+	unsigned int i,j;
+	
+	for(i=0;i<time;i++){
+		for(j=0;j< 0x2AFF; j++);
+	}
+}
+
+int main(void)
+{
+	SystemInit();
+	GPIO_configuration();
+	/*uint16_t mang[10]={0xBF, 0x86, 0xDB, 0xCF, 0xE6, 0xED, 0xFD, 0x87, 0xFF,0xEF}; //co dau cham*/
+	uint16_t mang[10]={0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F,0x6F}; //0 co dau cham
+	unsigned char i;
+	unsigned int j;
+	while(1)
+	{
+		//hien thi so 1 o hang chuc
+		GPIO_SetBits(GPIOB, GPIO_Pin_1); //day la chan dieu khien o hang don vi
+		GPIO_SetBits(GPIOA,  mang[1]); //hien thi so 1 (sang' o? ca hang chuc va hang don vi)
+		Delay(100);//1
+		GPIO_ResetBits(GPIOB, GPIO_Pin_1);//tat hang don vi 
+		GPIO_ResetBits(GPIOA,  mang[1]);//tat so 1 o hang don vi de ty nua so 2 se hien len o hang don vi k bi de`vs so 1
+		
+		//hien thi so 2 o hang don vi
+		GPIO_SetBits(GPIOB, GPIO_Pin_0); //day la chan dieu khien o hang` chuc.
+		GPIO_SetBits(GPIOA,  mang[2]); //hien thi so 2 (sang' o? ca hang chuc va hang don vi)
+		Delay(100); //cai nay giam xuong 1 de den nhay? cuc nhanh
+		GPIO_ResetBits(GPIOB, GPIO_Pin_0); //tat hang chuc
+		GPIO_ResetBits(GPIOA,  mang[2]); //tat so 2 o hang chuc
+	}
+}

@@ -1,0 +1,84 @@
+#include "stm32f10x.h"
+#include "stm32f10x_gpio.h"
+#include "stm32f10x_rcc.h"
+GPIO_InitTypeDef GPIO_InitStruct;
+#define RCC_GPIO_ROW		RCC_APB2Periph_GPIOA
+#define RCC_GPIO_COL		RCC_APB2Periph_GPIOB
+#define GPIO_ROW				GPIOA
+#define GPIO_COL				GPIOB
+#define GPIO_PIN_ROW_1	GPIO_Pin_0 // khai bao hang 1
+#define GPIO_PIN_ROW_2	GPIO_Pin_1 // khai bao hang 2
+#define GPIO_PIN_ROW_3	GPIO_Pin_2 // khai bao hang 3
+#define GPIO_PIN_ROW_4	GPIO_Pin_3 // khai bao hang 4
+#define GPIO_PIN_ROW_5	GPIO_Pin_4 // khai bao hang 5
+#define GPIO_PIN_ROW_6	GPIO_Pin_5 // khai bao hang 6
+#define GPIO_PIN_ROW_7	GPIO_Pin_6 // khai bao hang 7
+#define GPIO_PIN_ROW_8	GPIO_Pin_7 // khai bao hang 8
+#define GPIO_PIN_COL_1	GPIO_Pin_8 // khai bao cot 1
+#define GPIO_PIN_COL_2	GPIO_Pin_9 // khai bao cot 2
+#define GPIO_PIN_COL_3	GPIO_Pin_10 // khai bao cot 3
+#define GPIO_PIN_COL_4	GPIO_Pin_11 // khai bao cot 4
+#define GPIO_PIN_COL_5	GPIO_Pin_12 // khai bao cot 5
+#define GPIO_PIN_COL_6	GPIO_Pin_13 // khai bao cot 6
+#define GPIO_PIN_COL_7	GPIO_Pin_14 // khai bao cot 7
+#define GPIO_PIN_COL_8	GPIO_Pin_15 // khai bao cot 8
+
+unsigned int NAM[][8]={	{0x3c00,0x3800,0x3000,0x2400,0x0c00,0x1c00,0x3c00,0x3c00},
+												{0xc300,0xbd00,0x3c00,0x0000,0x3c00,0x3c00,0x3c00,0x3c00},
+												{0x7e00,0x3c00,0x1800,0x2400,0x3c00,0x3c00,0x3c00,0x3c00},	};
+
+void GPIO_Config()
+{
+	GPIO_InitTypeDef GPIO;
+	
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE); //cap clock cho Port A
+	GPIO.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO.GPIO_Pin  = GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3|GPIO_Pin_4|GPIO_Pin_5|GPIO_Pin_6|GPIO_Pin_7; //cau hinh cac chan I/O su dung cho ROW
+	GPIO.GPIO_Speed = GPIO_Speed_2MHz;
+	
+	GPIO_Init(GPIOA, &GPIO);
+	
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE); //cap clock cho Port B 
+	GPIO.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO.GPIO_Pin  = GPIO_Pin_8 |GPIO_Pin_9|GPIO_Pin_10 |GPIO_Pin_11 |GPIO_Pin_12 |GPIO_Pin_13 |GPIO_Pin_14 |GPIO_Pin_15;//cau hinh cac chan I/O su dung cho COL
+	GPIO.GPIO_Speed = GPIO_Speed_2MHz;
+	
+	GPIO_Init(GPIOB, &GPIO); 
+	
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_0;
+	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IPU;
+	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_10MHz;
+	GPIO_Init(GPIOC, &GPIO_InitStruct);
+}
+void Delay(unsigned int time){
+	
+	unsigned int i,j;
+	
+	for(i=0;i<time;i++){
+		for(j=0;j< 0x03FF; j++);
+	}
+}
+
+int main()
+{
+	int i,j,k=-1;
+	GPIO_Config();//goi chuong trinh con da khai bao
+	while(1){
+		if(GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_0)==0)
+			LAP:
+		{	k++; if(k>=3) k=0;
+			Delay(10);
+			while(GPIO_ReadInputDataBit(GPIOC,GPIO_Pin_0)==0) { }
+			while(1){
+				for(i=0;i<8;i++){
+					GPIOA->ODR=0x01<<i; 
+					GPIOB->ODR=NAM[k][i];  
+					Delay(1);			
+				}
+				if(GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_0)==0){ goto LAP;}
+			}
+		}
+  }		
+	
+}

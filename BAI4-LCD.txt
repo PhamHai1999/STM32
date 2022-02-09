@@ -1,0 +1,32 @@
+#include "stm32f10x.h"
+#include "LCD.h"
+#include "delay.h"
+
+void delay(uint32_t time){
+	while(time--);
+}
+
+
+int main(void){
+	SysTick_Init();
+	GPIO_LCD_Config();
+	LCD_Init();
+	delay_ms(20);
+	int i,t;
+	while(1)
+	{	
+		for(i=0;i<11;i++){
+			LCD_Gotoxy(0,0);
+			LCD_Puts("K.HOANG,M.QUANG,H.NAM,N.HAI");
+			delay_ms(1);
+			LCD_SendCommand(0x18);
+			delay_ms(1);
+		}
+		for(t=0;t<11;t++){
+			delay_ms(10);
+			LCD_SendCommand(0x1c);
+			delay_ms(10);
+		}
+		
+	}
+}

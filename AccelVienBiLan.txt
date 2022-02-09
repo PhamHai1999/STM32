@@ -1,0 +1,83 @@
+#include "stm32f10x.h"
+#include "stm32f10x_gpio.h"
+#include "stm32f10x_rcc.h"
+
+void Delay(unsigned int time);
+GPIO_InitTypeDef GPIO_Struct;
+int led[8]={0x0001,0x0002,0x0004,0x0008,0x0010,0x0020,0x0040,0x0080};
+int i=0,k=7;
+
+int main(void){
+	// cap clock cho GPIOA
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+	//cai dat cho chan Port A
+	GPIO_Struct.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_Struct.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7;
+	GPIO_Struct.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOA, &GPIO_Struct);
+	while(1)
+		{
+			for(i=0;i<=k;i++)
+				{
+				if(led[i]==0x0001||led[i]==0x0080)
+				{
+				GPIO_SetBits(GPIOA, led[i]);
+				Delay(150);
+				GPIO_ResetBits(GPIOA, led[i]);
+				}
+				else if(led[i]==0x0002||led[i]==0x0040)
+				{
+				GPIO_SetBits(GPIOA, led[i]);
+				Delay(120);
+				GPIO_ResetBits(GPIOA, led[i]);
+				}
+				else if(led[i]==0x0004||led[i]==0x0020)
+				{
+				GPIO_SetBits(GPIOA, led[i]);
+				Delay(90);
+				GPIO_ResetBits(GPIOA, led[i]);
+				}
+				else if(led[i]==0x0008||led[i]==0x0010)
+				{
+				GPIO_SetBits(GPIOA, led[i]);
+				Delay(60);
+				GPIO_ResetBits(GPIOA, led[i]);
+				}
+				}
+		
+			for(i=k;i>=0;i--)
+				{
+				if(led[i]==0x0001||led[i]==0x0080)
+				{
+				GPIO_SetBits(GPIOA, led[i]);
+				Delay(150);
+				GPIO_ResetBits(GPIOA, led[i]);
+				}
+				else if(led[i]==0x0002||led[i]==0x0040)
+				{
+				GPIO_SetBits(GPIOA, led[i]);
+				Delay(120);
+				GPIO_ResetBits(GPIOA, led[i]);
+				}
+				else if(led[i]==0x0004||led[i]==0x0020)
+				{
+				GPIO_SetBits(GPIOA, led[i]);
+				Delay(90);
+				GPIO_ResetBits(GPIOA, led[i]);
+				}
+				else if(led[i]==0x0008||led[i]==0x0010)
+				{
+				GPIO_SetBits(GPIOA, led[i]);
+				Delay(60);
+				GPIO_ResetBits(GPIOA, led[i]);
+				}
+				}
+		}
+}
+
+void Delay(unsigned int time){
+	unsigned int i,j;
+	for(i=0;i<time;i++){
+		for(j=0;j< 0x2AFF; j++);
+	}
+}
